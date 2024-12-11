@@ -15,7 +15,6 @@ public class Configuration {
     @Id
     private Long id;
 
-
     public Configuration(int totalTickets, int maxTicketCapacity, double ticketReleaseRate, double customerRetrievalRate) {
         this.totalTickets = totalTickets;
         this.maxTicketCapacity = maxTicketCapacity;
@@ -59,7 +58,7 @@ public class Configuration {
     }
     @Override
     public String toString() {
-        return "Configuration{" +
+        return "Ticket{" +
                 "totalTickets=" + totalTickets +
                 ", maxTicketCapacity=" + maxTicketCapacity +
                 ", ticketReleaseRate=" + ticketReleaseRate +

@@ -4,14 +4,12 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class TicketPool {
-    private int maximumCapacity;
+    private final int maximumCapacity;
     private final Queue<Ticket> ticketPool = new LinkedList<>();
 
-    public TicketPool(){}
     public TicketPool(int maximumCapacity) {
         this.maximumCapacity = maximumCapacity;
     }
-
 
     public synchronized void addTicket(Ticket tickets) {
         if (ticketPool.size() < maximumCapacity) {

@@ -15,13 +15,12 @@ public class LoggingService {
         logs.add(log);
     }
 
-    public synchronized void addCustomerLog(String customerId, int availableSize) {
-        Ticket ticket = new Ticket();
-        String logEntry = customerId + " " + "has bought from the Ticket Pool. Now available size is " + availableSize + ". Ticket is " + ticket;
+    public synchronized void addCustomerLog(String customerId, int availableSize,Ticket ticket) {
+        String logEntry = "Customer-" +customerId + " " + "has bought from the Ticket Pool. Now available size is " + availableSize + ". Ticket is " + ticket;
         addLog(logEntry);
     }
     public synchronized void addVendorLog(String vendorId, int availableSize) {
-        String logEntry = vendorId + " has added tickets in the Ticket Pool. Now available size is " + availableSize;
+        String logEntry = "Vendor-" +vendorId + " has added tickets in the Ticket Pool. Now available size is " + availableSize;
         addLog(logEntry);
     }
 
