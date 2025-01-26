@@ -12,7 +12,7 @@ export default function Configuration() {
     const [customerRetrievalRate, setCustomerRetrievalRate] = useState('');
     const [logs, setLogs] = useState([]);
     const [isRunning, setIsRunning] = useState(false);
-    const [intervalId, setIntervalId] = useState(null);
+    const [intervalId] = useState(null);
 
     const handleClick = (e) => {
         e.preventDefault()
@@ -31,20 +31,39 @@ export default function Configuration() {
             },
             body: JSON.stringify(ticket),
         })
-            .then(() => {
-                alert("Configuration added successfully!");
+            .then((response) => {
+                // Check if the response is OK
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+
+                // Parse the JSON response
+                return response.json();
             })
-            .catch(() => {
-                alert("Error submitting configuration!");
+            .then((data) => {
+                // If the response is valid JSON, log it and alert the user
+                alert('Configuration received successfully!');
+                console.log(data);
+            })
+            .catch((error) => {
+                // Log any errors
+                // console.error('Error sending configuration:', error);
             });
     }
+
     useEffect(() => {
+        let interval;
+
         if (isRunning) {
-            const interval = setInterval(() => {
+            interval = setInterval(() => {
                 fetchLogs();
             }, 1000);
-            return () => clearInterval(interval);
+        } else {
+            if (interval) {
+                clearInterval(interval);  // Clear interval on stop
+            }
         }
+        return () => clearInterval(interval);  // Cleanup interval on unmount or stop
     }, [isRunning]);
 
     const fetchLogs = async () => {
@@ -54,6 +73,7 @@ export default function Configuration() {
                 throw new Error('Network response was not ok');
             }
             const data = await response.json();
+            console.log("Fetched logs:", data);  // For debugging, check the logs here
             setLogs(data);  // Update the logs state with the fetched logs
         } catch (error) {
             console.error("Error fetching logs:", error);
@@ -61,17 +81,40 @@ export default function Configuration() {
     };
 
     const handleStart = () => {
-        setIsRunning(true);
+        fetch("http://localhost:8080/api/start", {
+            method: 'POST',
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert("Application started successfully!");
+                    setIsRunning(true);
+                } else {
+                    alert("Failed to start the application.");
+                }
+            })
+            .catch(error => {
+                alert("Error starting application: " + error.message);
+            });
     };
 
     const handleStop = () => {
-        setIsRunning(false);
-        if (intervalId) {
-            clearInterval(intervalId); // Clear the interval
-            setIntervalId(null);
-        }
+        fetch("http://localhost:8080/api/stop", {
+            method: 'POST',
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert("Application stopped successfully!");
+                    setIsRunning(false);
+                    clearInterval(intervalId);  // Clear the log polling interval
+                }
+                else {
+                    alert("Failed to stop the application.");
+                }
+            })
+            .catch(error => {
+                alert("Error stopping application: " + error.message);
+            });
     };
-
 
     return (
         <Container>
@@ -112,19 +155,28 @@ export default function Configuration() {
             </Paper>
 
             <Paper elevation={3} style={paperStyle}>
-                <Box component="form" sx={{ '& > :not(style)': { m: 1 } }} noValidate autoComplete="off">
-                    <h1 style={{ color: "#1591ea", fontSize: 25, textAlign: "center" }}>Logs</h1>
-                    <div style={{ maxHeight: 500, overflow: 'auto' }}>
-                        {logs.map((log, index) => (
-                            <p key={index}>{log}</p>
-                        ))}
-                    </div>
+                <Box
+                    component="form"
+                    sx={{ '& > :not(style)': { m: 1 } }}
+                    noValidate
+                    autoComplete="off"
+                >
                     <Button variant="contained" color="success" onClick={handleStart}>
                         Start
                     </Button>
                     <Button variant="contained" color="error" onClick={handleStop}>
                         Stop
                     </Button>
+                </Box>
+            </Paper>
+            <Paper elevation={3} style={paperStyle}>
+                <Box component="form" sx={{ '& > :not(style)': { m: 1 } }} noValidate autoComplete="off">
+                    <h1 style={{ color: "#1591ea", fontSize: 25, textAlign: "center" }}>Logs</h1>
+                    <div style={{ maxHeight: 500, overflow: 'auto' }}>
+                        {logs.map((log, index) => (
+                            <p key={index}>{log}</p>
+                            ))}
+                    </div>
                 </Box>
             </Paper>
         </Container>
